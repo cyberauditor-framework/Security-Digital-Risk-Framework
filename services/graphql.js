@@ -1,4 +1,4 @@
-const graphqlFetch = async (url, query, variables = {}, headers = {}) => {
+export const graphqlFetch = async (url, query, variables = {}, headers = {}) => {
     try {
       
       const defaultHeaders = {
