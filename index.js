@@ -56,30 +56,130 @@ async function main() {
   // Query para obtener detalle de cada campaña en cuanto a técnicas y detecciones DISABLED
   const detailQuery = `
     query CampaignsQuery($id: ID!) {
-      prioritizedTechniques(prioritizedCampaignId: $id) {
-        edges {
-          node {
-            technique {
-              detections {
-                edges {
-                  node {
-                    state
-                    techniqueMitreIds
-                  }
-                }
-              }
+        prioritizedCampaigns(id: $id) {
+            edges {
+            node {
+                name
+                content
+                id
+                stixId
+                description
+                modifiedTimestamp
+                lastSeenTimestamp
+                description
+                aliasNames
+                origin
+                referenceUrls
+                countries
+                industries
+                __typename
             }
-          }
+            __typename
+            }
+            __typename
         }
-      }
+        prioritizedTechniques(prioritizedCampaignId: $id) {
+            totalCount
+            edges {
+            node {
+                id
+                name
+                priority
+                content
+                mitreId
+                technique {
+                detections {
+                    edges {
+                    node {
+                        id
+                        name
+                        state
+                        integrationName
+                        techniqueMitreIds
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+                referenceDetections {
+                    edges {
+                    node {
+                        id
+                        name
+                        techniqueMitreIds
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+                __typename
+                }
+                __typename
+            }
+            __typename
+            }
+            __typename
+        }
+        prioritizedSoftware(prioritizedCampaignId: $id) {
+            totalCount
+            edges {
+            node {
+                id
+                mitreId
+                name
+                priority
+                content
+                __typename
+            }
+            __typename
+            }
+            __typename
+        }
+        prioritizedThreatGroups(prioritizedCampaignId: $id) {
+            totalCount
+            edges {
+            node {
+                id
+                mitreId
+                name
+                priority
+                content
+                __typename
+            }
+            __typename
+            }
+            __typename
+        }
+        prioritizedVulnerabilities(prioritizedCampaignId: $id) {
+            totalCount
+            edges {
+            node {
+                id
+                name
+                priority
+                integrationNames
+                assetCount
+                cvssSeverityScore
+                __typename
+            }
+            __typename
+            }
+            __typename
+        }
     }
   `;
 
+  
   // Procesar cada campaña para obtener los techniqueMitreIds de detecciones con state "DISABLED"
   for (const { node: campaign } of campaigns) {
     console.log(`Procesando campaña: ${campaign.name} (ID: ${campaign.id})`);
-
-    const detailData = await graphqlFetch(ENDPOINT, detailQuery, { id: campaign.id }, HEADERS);
+    
+    const totalCampaignDisabledTechniques = []
+    const totalCampaignEnabledTechniques = []
+    const detailVariables = { id: campaign.id }
+    const detailData = await graphqlFetch(ENDPOINT, detailQuery, detailVariables, HEADERS);
 
     let disabledTechniqueMitreIds = [];
     const techniques = detailData.prioritizedTechniques.edges || [];
@@ -88,10 +188,15 @@ async function main() {
       detections.forEach(det => {
         if (det.node.state === "DISABLED") {
           disabledTechniqueMitreIds.push(...det.node.techniqueMitreIds);
+          totalCampaignDisabledTechniques.push(det.node.techniqueMitreIds)
         }
-      });
+        totalCampaignEnabledTechniques.push(det.node.techniqueMitreIds)
     });
+});
+    
     console.log(`\tTechnique Mitre IDs (DISABLED): ${disabledTechniqueMitreIds.join(', ') || 'Ninguno'}`);
+    console.log(`\tTotal de técnicas DISABLED: ${disabledTechniqueMitreIds.length}`);
+    console.log(`\tTotal de técnicas ENABLED: ${totalCampaignEnabledTechniques.length}`);
   }
 
   console.log("Proceso completado.");
