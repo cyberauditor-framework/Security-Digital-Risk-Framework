@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/cyberauditor-framework/portal/issues"
   },
-  "homepage": "https://github.com/cyberauditor-framework/portal#readme"
+  "homepage": "https://github.com/cyberauditor-framework/portal#readme",
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4"
+  }
 }
