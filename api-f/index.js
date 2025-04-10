@@ -1,100 +1,79 @@
-import {
-	graphqlFetch,
-	cleanGraphQLResponse,
-} from "./providers/graphql/graphqlClient.js";
-import {
-	getCampaignsQuery,
-	getCampaignDetailQuery,
-} from "./providers/graphql/querys/campaignsQuery.js";
-import { initStorage } from "./providers/persistence/jsonPersistence.js";
+import { listFiles, loadData } from "../persistence/jsonPersistence.js";
 
-const ENDPOINT = "https://interpres.io/api/graphql/";
+const STORAGE_DIR = "../db/common";
 
-const HEADERS = {
-	Cookie: process.env.COOKIE,
+const analyzeDetectionsFromCampaignDetail = (data) => {
+	const techniqueDetails = [];
+	let totalTechniques = 0;
+	let totalDetections = 0;
+	let totalEnabled = 0;
+	let totalDisabled = 0;
+
+	// Loop through each technique
+	data.techniques.forEach((technique) => {
+		totalTechniques++;
+
+		// Extract detections if they exist
+		const detections = technique.technique?.detections || [];
+		totalDetections += detections.length;
+
+		// Count enabled and disabled detections
+		let enabledCount = 0;
+		let disabledCount = 0;
+
+		detections.forEach((detection) => {
+			if (detection.state === "ENABLED") {
+				enabledCount++;
+				totalEnabled++;
+			} else if (detection.state === "DISABLED") {
+				disabledCount++;
+				totalDisabled++;
+			}
+		});
+
+		// Add result for this technique
+		techniqueDetails.push({
+			techniqueId: technique.id,
+			techniqueName: technique.name,
+			mitreTechniqueId: technique.mitreId,
+			totalDetections: detections.length,
+			enabledDetections: enabledCount,
+			disabledDetections: disabledCount,
+		});
+	});
+
+	// Create result object with details and summary
+	return {
+		techniqueDetails: techniqueDetails,
+		summary: {
+			totalTechniques: totalTechniques,
+			totalDetections: totalDetections,
+			totalEnabledDetections: totalEnabled,
+			totalDisabledDetections: totalDisabled,
+		},
+	};
 };
 
-const getCampaigns = async () => {
-	const getCampaignsQueryVariable = {
-		offset: 0,
-		name_Icontains: "",
-		pageSize: 1,
-		orderBy: "-createdTimestamp",
-	};
+export const campaignAnalysisDetections = async (storageDir = STORAGE_DIR) => {
+	const campaignFiles = await listFiles(storageDir);
+	console.log("Campaign files:", campaignFiles);
 
-	const rawCampaigns = await graphqlFetch(
-		ENDPOINT,
-		getCampaignsQuery,
-		getCampaignsQueryVariable,
-		HEADERS,
-	);
+	const listCampaignsDetailsClient = [];
 
-	console.log("rawCampaigns", rawCampaigns);
+	for (const campaignFile of campaignFiles) {
+		const campaignDetail = await loadData(`${campaignFile}`, storageDir);
+		const campaignAnalysisDetections =
+			analyzeDetectionsFromCampaignDetail(campaignDetail);
 
-	const formatedCampaigns = cleanGraphQLResponse(rawCampaigns);
-
-	console.log("formatedListData", formatedCampaigns);
-
-	const campaigns = formatedCampaigns.prioritizedCampaigns;
-
-	if (!campaigns || campaigns.length === 0) {
-		console.log("Campaigns not found.");
+		const campaignDetailWithAnalysis = {
+			campaignId: campaignFile,
+			campaignAnalysisDetections: campaignAnalysisDetections,
+		};
+		listCampaignsDetailsClient.push(campaignDetailWithAnalysis);
 	}
 
-	console.log(`Campaigns found: ${campaigns.length}`);
-
-	return campaigns;
+	return listCampaignsDetailsClient;
 };
-
-const getCampaignDetail = async (campaignId) => {
-	const getCampaignDetailQueryVariable = {
-		id: campaignId,
-	};
-
-	const campaignDetailRaw = await graphqlFetch(
-		ENDPOINT,
-		getCampaignDetailQuery,
-		getCampaignDetailQueryVariable,
-		HEADERS,
-	);
-
-	const formatedCampaignDetail = cleanGraphQLResponse(campaignDetailRaw);
-
-	const campaignDetail = {
-		campaigns: formatedCampaignDetail.prioritizedCampaigns,
-		techniques: formatedCampaignDetail.prioritizedTechniques,
-		software: formatedCampaignDetail.prioritizedSoftware,
-		threatGroups: formatedCampaignDetail.prioritizedThreatGroups,
-		vulnerabilities: formatedCampaignDetail.prioritizedVulnerabilities,
-	};
-
-	// console.log(
-	// 	`Campaign Detail: ${JSON.stringify(formatedCampaignDetail, null, 2)}`,
-	// );
-
-	return campaignDetail;
-};
-
-(async () => {
-	try {
-		console.log("Initializing api-f...");
-
-		// await initStorage();
-
-		const campaigns = await getCampaigns();
-
-		for (const campaign of campaigns) {
-			const campaignId = campaign.id;
-			console.log("Campaign ID:", campaignId);
-
-			const campaignDetail = await getCampaignDetail(campaignId);
-			console.log("Campaign Detail:", campaignDetail);
-		}
-	} catch (error) {
-		console.error("Initialization error:", error);
-		process.exit(1);
-	}
-})();
 
 process.on("uncaughtException", (err) => {
 	console.error("Error no capturado:", err);
