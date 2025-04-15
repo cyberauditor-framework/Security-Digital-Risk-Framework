@@ -1,25 +1,25 @@
 {
-  "name": "portal",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "start": "node --env-file=.env index.js",
-    "test": "node --env-file=.env main.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cyberauditor-framework/portal.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "bugs": {
-    "url": "https://github.com/cyberauditor-framework/portal/issues"
-  },
-  "homepage": "https://github.com/cyberauditor-framework/portal#readme",
-  "devDependencies": {
-    "@biomejs/biome": "1.9.4"
-  }
+	"name": "portal",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "node --env-file=.env index.js",
+		"test": "node --env-file=.env main.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/cyberauditor-framework/portal.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"type": "module",
+	"bugs": {
+		"url": "https://github.com/cyberauditor-framework/portal/issues"
+	},
+	"homepage": "https://github.com/cyberauditor-framework/portal#readme",
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4"
+	}
 }
