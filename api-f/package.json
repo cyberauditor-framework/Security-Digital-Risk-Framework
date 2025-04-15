@@ -13,5 +13,9 @@
 	"type": "module",
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4"
+	},
+	"dependencies": {
+		"csv-parse": "^5.6.0",
+		"xlsx": "^0.18.5"
 	}
 }
