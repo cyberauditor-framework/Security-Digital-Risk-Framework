@@ -1,5 +1,15 @@
 export const getPlatformsQuery = `
   query Platforms {
-    platformNames
+    platforms {
+      count
+      totalCount
+      edges {
+        node {
+          id
+          name
+          description
+        }
+      }
+    }
   }
 `;

@@ -20,7 +20,11 @@ export const getPlatforms = async () => {
 
 	const formattedPlatforms = cleanGraphQLResponse(rawPlatforms);
 
-	const platforms = formattedPlatforms.platformNames;
+	const platforms = formattedPlatforms.platforms.map((edge) => ({
+		id: edge.id,
+		name: edge.name,
+		description: edge.description,
+	}));
 
 	if (!platforms || platforms.length === 0) {
 		console.log("Platforms not found.");

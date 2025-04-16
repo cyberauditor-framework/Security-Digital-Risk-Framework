@@ -17,7 +17,7 @@ export const getCampaigns = async () => {
 	const getCampaignsQueryVariable = {
 		offset: 0,
 		name_Icontains: "",
-		pageSize: 2,
+		pageSize: 10,
 		orderBy: "-createdTimestamp",
 	};
 
