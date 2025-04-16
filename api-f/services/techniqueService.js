@@ -42,11 +42,36 @@ export const getTechniques = async () => {
 
 	const formattedTechniques = cleanGraphQLResponse(rawTechniques);
 
-	const techniques = formattedTechniques.prioritizedTechniques;
-
-	if (!techniques || techniques.length === 0) {
+	if (
+		!formattedTechniques ||
+		!formattedTechniques.techniques ||
+		formattedTechniques.techniques.length === 0
+	) {
 		console.log("Techniques not found.");
+		return { techniques: [], fullTechniques: [] };
 	}
 
-	return techniques;
+	// Crear una versión simplificada para el JSON
+	const simplifiedTechniques = formattedTechniques.techniques.map(
+		(technique) => ({
+			id: technique.id,
+			name: technique.name,
+			description: technique.description,
+			priority: technique.priority,
+			content: technique.content,
+			modifiedTimestamp: technique.modifiedTimestamp,
+			mitreId: technique.mitreId,
+			universalPriority: technique.universalPriority,
+			subtechnique: technique.subtechnique,
+			deprecated: technique.deprecated,
+			createdTimestamp: technique.createdTimestamp,
+			update: technique.update,
+			stixId: technique.stixId,
+		}),
+	);
+
+	return {
+		techniques: simplifiedTechniques,
+		fullTechniques: formattedTechniques.techniques,
+	};
 };

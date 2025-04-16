@@ -1,6 +1,6 @@
 import { initStorage, saveData } from "../persistence/jsonPersistence.js";
 
-import { getCampaigns, getCampaignDetail } from "./services/campaignService.js";
+import { getCampaigns } from "./services/campaignService.js";
 import { getTechniques } from "./services/techniqueService.js";
 import { getVulnerabilities } from "./services/vulnerabilityService.js";
 import { getPlatforms } from "./services/platformService.js";
@@ -9,6 +9,7 @@ import { getSoftware } from "./services/softwareService.js";
 import { getThreatGroups } from "./services/threatGroupService.js";
 import { getIntegrations } from "./services/integrationService.js";
 import { parseFile } from "./services/fileParserService.js";
+import { getDetections } from "./services/detectionService.js";
 
 // Importar servicios de relaciones
 import { getCampaignTechniquesRelation } from "./services/relations/campaignTechniqueService.js";
@@ -23,39 +24,81 @@ const STORAGE_DIR = "../db/common";
 
 const seedData = async () => {
 	// Obtener y guardar las tablas principales
-	const campaigns = await getCampaigns();
+	const { campaigns, fullCampaigns } = await getCampaigns();
 	await saveData("campaigns", campaigns, STORAGE_DIR);
 
-	const techniques = await getTechniques();
+	const { techniques, fullTechniques } = await getTechniques();
+	await saveData("techniques", techniques, STORAGE_DIR);
 
-	const filteredTechniques = techniques.map(
-		({
-			id,
-			name,
-			description,
-			priority,
-			content,
-			modifiedTimestamp,
-			mitreId,
-			threatGroupsCount,
-			softwareCount,
-			campaignsCount,
-		}) => ({
-			id,
-			name,
-			description,
-			priority,
-			content,
-			modifiedTimestamp,
-			mitreId,
-			threatGroupsCount,
-			softwareCount,
-			campaignsCount,
-		}),
+	// Generate technique relationships
+	const techniqueTacticsRelations = [];
+	const techniquePlatformsRelations = [];
+	const techniqueSoftwareRelations = [];
+	const techniqueDetectionsRelations = [];
+
+	// Get detections
+	const detections = await getDetections();
+	await saveData("detections", detections, STORAGE_DIR);
+
+	// Procesar las relaciones de técnicas
+	for (const technique of fullTechniques) {
+		// Technique-Tactics relations
+		if (technique.tactics) {
+			technique.tactics.forEach((tactic) => {
+				techniqueTacticsRelations.push({
+					technique_id: technique.id,
+					tactic_id: tactic.id,
+				});
+			});
+		}
+
+		// Technique-Platforms relations
+		if (technique.platforms) {
+			technique.platforms.forEach((platform) => {
+				techniquePlatformsRelations.push({
+					technique_id: technique.id,
+					platform_id: platform.id,
+				});
+			});
+		}
+
+		// Technique-Software relations
+		if (technique.software) {
+			technique.software.forEach((sw) => {
+				techniqueSoftwareRelations.push({
+					technique_id: technique.id,
+					software_id: sw.id,
+				});
+			});
+		}
+
+		// Technique-Detections relations
+		if (technique.detections) {
+			technique.detections.forEach((detection) => {
+				techniqueDetectionsRelations.push({
+					technique_id: technique.id,
+					detection_id: detection.id,
+					effectiveness: 0, // Default value, can be updated later
+				});
+			});
+		}
+	}
+
+	// Save technique relationships
+	await saveData("technique_tactics", techniqueTacticsRelations, STORAGE_DIR);
+	await saveData(
+		"technique_platforms",
+		techniquePlatformsRelations,
+		STORAGE_DIR,
 	);
-	await saveData("techniques", filteredTechniques, STORAGE_DIR);
+	await saveData("technique_software", techniqueSoftwareRelations, STORAGE_DIR);
+	await saveData(
+		"technique_detections",
+		techniqueDetectionsRelations,
+		STORAGE_DIR,
+	);
 
-	const vulnerabilities = await getVulnerabilities();
+	const { vulnerabilities, fullVulnerabilities } = await getVulnerabilities();
 	await saveData("vulnerabilities", vulnerabilities, STORAGE_DIR);
 
 	const platforms = await getPlatforms();
@@ -81,26 +124,48 @@ const seedData = async () => {
 	const campaignThreatGroupsRelations = [];
 	const campaignVulnerabilitiesRelations = [];
 
-	for (const campaign of campaigns) {
+	for (const campaign of fullCampaigns) {
 		const campaignId = campaign.id;
 
 		// Relación campaña-técnicas
-		const campaignTechniques = await getCampaignTechniquesRelation(campaignId);
-		campaignTechniquesRelations.push(...campaignTechniques);
+		if (campaign.techniques) {
+			campaign.techniques.forEach((technique) => {
+				campaignTechniquesRelations.push({
+					campaign_id: campaignId,
+					technique_id: technique.id,
+				});
+			});
+		}
 
 		// Relación campaña-software
-		const campaignSoftware = await getCampaignSoftwareRelation(campaignId);
-		campaignSoftwareRelations.push(...campaignSoftware);
+		if (campaign.software) {
+			campaign.software.forEach((sw) => {
+				campaignSoftwareRelations.push({
+					campaign_id: campaignId,
+					software_id: sw.id,
+				});
+			});
+		}
 
 		// Relación campaña-grupos de amenazas
-		const campaignThreatGroups =
-			await getCampaignThreatGroupsRelation(campaignId);
-		campaignThreatGroupsRelations.push(...campaignThreatGroups);
+		if (campaign.threatGroups) {
+			campaign.threatGroups.forEach((threatGroup) => {
+				campaignThreatGroupsRelations.push({
+					campaign_id: campaignId,
+					threat_group_id: threatGroup.id,
+				});
+			});
+		}
 
 		// Relación campaña-vulnerabilidades
-		const campaignVulnerabilities =
-			await getCampaignVulnerabilitiesRelation(campaignId);
-		campaignVulnerabilitiesRelations.push(...campaignVulnerabilities);
+		if (campaign.vulnerabilities) {
+			campaign.vulnerabilities.forEach((vulnerability) => {
+				campaignVulnerabilitiesRelations.push({
+					campaign_id: campaignId,
+					vulnerability_id: vulnerability.id,
+				});
+			});
+		}
 	}
 
 	// Guardar relaciones de campañas
@@ -121,56 +186,21 @@ const seedData = async () => {
 		STORAGE_DIR,
 	);
 
-	// Relaciones de técnicas con tácticas
-	const techniqueTacticsRelations = [];
-
-	for (const technique of techniques) {
-		const techniqueId = technique.id;
-		const techniqueMitreId = technique.mitreId;
-		if (techniqueMitreId) {
-			const techniqueTactics = await getTechniqueTacticsRelation(
-				techniqueId,
-				techniqueMitreId,
-			);
-			techniqueTacticsRelations.push(...techniqueTactics);
+	// Guardar relaciones de vulnerabilidades con plataformas
+	const vulnerabilityPlatformsRelations = [];
+	for (const vulnerability of fullVulnerabilities) {
+		if (vulnerability.platforms) {
+			vulnerability.platforms.forEach((platform) => {
+				vulnerabilityPlatformsRelations.push({
+					vulnerability_id: vulnerability.id,
+					platform_id: platform.id,
+				});
+			});
 		}
 	}
-
-	await saveData("technique_tactics", techniqueTacticsRelations, STORAGE_DIR);
-
-	// Relaciones de software con técnicas
-	const softwareTechniquesRelations = [];
-
-	for (const sw of software) {
-		const softwareMitreId = sw.mitreId;
-		if (softwareMitreId) {
-			const softwareTechniques =
-				await getSoftwareTechniquesRelation(softwareMitreId);
-			softwareTechniquesRelations.push(...softwareTechniques);
-		}
-	}
-
 	await saveData(
-		"software_techniques",
-		softwareTechniquesRelations,
-		STORAGE_DIR,
-	);
-
-	// Relaciones de grupos de amenazas con técnicas
-	const threatGroupTechniquesRelations = [];
-
-	for (const threatGroup of threatGroups) {
-		const threatGroupMitreId = threatGroup.mitreId;
-		if (threatGroupMitreId) {
-			const threatGroupTechniques =
-				await getThreatGroupTechniquesRelation(threatGroupMitreId);
-			threatGroupTechniquesRelations.push(...threatGroupTechniques);
-		}
-	}
-
-	await saveData(
-		"threatGroup_techniques",
-		threatGroupTechniquesRelations,
+		"vulnerability_platforms",
+		vulnerabilityPlatformsRelations,
 		STORAGE_DIR,
 	);
 

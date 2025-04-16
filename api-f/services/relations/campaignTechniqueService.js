@@ -2,7 +2,7 @@ import {
 	graphqlFetch,
 	cleanGraphQLResponse,
 } from "../../providers/graphql/graphqlClient.js";
-import { getCampaignTechniquesQuery } from "../../providers/graphql/querys/campaignTechniquesQuery.js";
+import { getCampaignDetailQuery } from "../../providers/graphql/querys/campaignsQuery.js";
 
 const ENDPOINT = "https://interpres.io/api/graphql/";
 
@@ -11,28 +11,36 @@ const HEADERS = {
 };
 
 export const getCampaignTechniquesRelation = async (campaignId) => {
-	const queryVariables = {
-		campaignId: campaignId,
+	const getCampaignDetailQueryVariable = {
+		id: campaignId,
 	};
 
-	const rawData = await graphqlFetch(
+	const rawCampaignDetail = await graphqlFetch(
 		ENDPOINT,
-		getCampaignTechniquesQuery,
-		queryVariables,
+		getCampaignDetailQuery,
+		getCampaignDetailQueryVariable,
 		HEADERS,
 	);
 
-	const formattedData = cleanGraphQLResponse(rawData);
+	const formattedCampaignDetail = cleanGraphQLResponse(rawCampaignDetail);
 
-	// Extraer las técnicas y crear la tabla relacional
-	const techniques = formattedData.prioritizedTechniques || [];
+	if (
+		!formattedCampaignDetail ||
+		!formattedCampaignDetail.campaigns ||
+		formattedCampaignDetail.campaigns.length === 0
+	) {
+		console.log("Campaign detail not found.");
+		return [];
+	}
 
-	// Crear la tabla relacional campaign_techniques
-	const campaignTechniquesRelation = techniques.map((edge) => ({
-		campaignId: campaignId,
-		techniqueId: edge.id,
-		techniqueMitreId: edge.mitreId,
+	const campaign = formattedCampaignDetail.campaigns[0];
+
+	if (!campaign.techniques) {
+		return [];
+	}
+
+	return campaign.techniques.map((technique) => ({
+		campaign_id: campaignId,
+		technique_id: technique.id,
 	}));
-
-	return campaignTechniquesRelation;
 };

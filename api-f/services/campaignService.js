@@ -16,9 +16,24 @@ const HEADERS = {
 export const getCampaigns = async () => {
 	const getCampaignsQueryVariable = {
 		offset: 0,
-		name_Icontains: "",
+		searchNameOrMitreId: "",
+		tacticNames: "",
+		integrationNames: "",
+		platformNames: "",
+		priority: "",
+		content: "",
+		mitreIds: "",
+		campaignStixIds: "",
+		softwareMitreIds: "",
+		threatGroupMitreIds: "",
+		telemetrySubcategoryNames: "",
+		controlStixIds: "",
+		telemetrySubcategoryId: "",
+		countries: [],
+		industries: [],
 		pageSize: 10,
-		orderBy: "-createdTimestamp",
+		domainName: "",
+		orderBy: "-priority",
 	};
 
 	const rawCampaigns = await graphqlFetch(
@@ -28,15 +43,45 @@ export const getCampaigns = async () => {
 		HEADERS,
 	);
 
-	const formatedCampaigns = cleanGraphQLResponse(rawCampaigns);
+	const formattedCampaigns = cleanGraphQLResponse(rawCampaigns);
 
-	const campaigns = formatedCampaigns.prioritizedCampaigns;
-
-	if (!campaigns || campaigns.length === 0) {
+	if (
+		!formattedCampaigns ||
+		!formattedCampaigns.campaigns ||
+		formattedCampaigns.campaigns.length === 0
+	) {
 		console.log("Campaigns not found.");
+		return { campaigns: [], fullCampaigns: [] };
 	}
 
-	return campaigns;
+	// Crear una versión simplificada para el JSON
+	const simplifiedCampaigns = formattedCampaigns.campaigns.map((campaign) => ({
+		id: campaign.id,
+		name: campaign.name,
+		stixId: campaign.stixId,
+		description: campaign.description,
+		deprecated: campaign.deprecated,
+		revoked: campaign.revoked,
+		createdTimestamp: campaign.createdTimestamp,
+		modifiedTimestamp: campaign.modifiedTimestamp,
+		update: campaign.update,
+		type: campaign.type,
+		origin: campaign.origin,
+		firstSeenTimestamp: campaign.firstSeenTimestamp,
+		lastSeenTimestamp: campaign.lastSeenTimestamp,
+		aliasNames: campaign.aliasNames,
+		techniquesCount: campaign.techniquesCount,
+		softwareCount: campaign.softwareCount,
+		threatGroupsCount: campaign.threatGroupsCount,
+		vulnerabilityCveIds: campaign.vulnerabilityCveIds,
+		vulnerabilitiesCount: campaign.vulnerabilitiesCount,
+		assetsCount: campaign.assetsCount,
+	}));
+
+	return {
+		campaigns: simplifiedCampaigns,
+		fullCampaigns: formattedCampaigns.campaigns,
+	};
 };
 
 export const getCampaignDetail = async (campaignId) => {
@@ -44,22 +89,31 @@ export const getCampaignDetail = async (campaignId) => {
 		id: campaignId,
 	};
 
-	const campaignDetailRaw = await graphqlFetch(
+	const rawCampaignDetail = await graphqlFetch(
 		ENDPOINT,
 		getCampaignDetailQuery,
 		getCampaignDetailQueryVariable,
 		HEADERS,
 	);
 
-	const formatedCampaignDetail = cleanGraphQLResponse(campaignDetailRaw);
+	const formattedCampaignDetail = cleanGraphQLResponse(rawCampaignDetail);
 
-	const campaignDetail = {
-		campaigns: formatedCampaignDetail.prioritizedCampaigns,
-		techniques: formatedCampaignDetail.prioritizedTechniques,
-		software: formatedCampaignDetail.prioritizedSoftware,
-		threatGroups: formatedCampaignDetail.prioritizedThreatGroups,
-		vulnerabilities: formatedCampaignDetail.prioritizedVulnerabilities,
+	if (
+		!formattedCampaignDetail ||
+		!formattedCampaignDetail.campaigns ||
+		formattedCampaignDetail.campaigns.length === 0
+	) {
+		console.log("Campaign detail not found.");
+		return null;
+	}
+
+	const campaign = formattedCampaignDetail.campaigns[0];
+
+	return {
+		...campaign,
+		techniques: campaign.techniques || [],
+		software: campaign.software || [],
+		threatGroups: campaign.threatGroups || [],
+		vulnerabilities: campaign.vulnerabilities || [],
 	};
-
-	return campaignDetail;
 };
