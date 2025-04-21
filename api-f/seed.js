@@ -229,13 +229,25 @@ const seedData = async () => {
 	// Parse NIST800-53-CONTROLS.xlsx
 	const nistData = await parseFile(
 		"C:\\Users\\239834\\Documents\\Cyberproof\\2025-BOVEDA\\0.DISEÑO\\DATOS\\ANEXOS\\NIST800-53-CONTROLS.xlsx",
-		["Technique ID", "Technique Name", "Control ID"],
+		[
+			"Technique ID",
+			"Technique Name",
+			"Control ID",
+			"Control Name",
+			"Technique Name",
+		],
 	);
 
 	// Parse CISV8.CONTROLS.xlsx
 	const cisData = await parseFile(
 		"C:\\Users\\239834\\Documents\\Cyberproof\\2025-BOVEDA\\0.DISEÑO\\DATOS\\ANEXOS\\CISV8.CONTROLS.xlsx",
-		["Technique ID", "Technique Name", "Control ID"],
+		[
+			"Technique ID",
+			"Technique Name",
+			"Control ID",
+			"Control Name",
+			"Description",
+		],
 	);
 
 	// Combine data into ttp-rel-standard.json format
@@ -245,12 +257,18 @@ const seedData = async () => {
 			idMitre: String(item["Technique ID"]),
 			standard: "NIST800",
 			controlId: String(item["Control ID"]),
+			controlName: String(item["Control Name"]),
+			techniqueName: String(item["Technique Name"]),
+			description: "",
 		})),
 		...cisData.map((item) => ({
 			id: "2",
 			idMitre: String(item["Technique ID"]),
 			standard: "CISV8",
 			controlId: String(item["Control ID"]),
+			controlName: String(item["Control Name"]),
+			techniqueName: "",
+			description: item.Description,
 		})),
 	];
 
