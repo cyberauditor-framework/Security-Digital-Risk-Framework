@@ -643,13 +643,6 @@ process.on("unhandledRejection", (reason, promise) => {
 			campaignDetailInfo,
 			"../db/results",
 		);
-		// const campaignsWithThreatProfile = await getCampaignsWithThreatProfile();
-		// await saveData(
-		// 	"campaign_with_threat_profile",
-		// 	campaignsWithThreatProfile,
-		// 	//db/common -> Provisional
-		// 	"../db/common",
-		// );
 		const campaignsWithThreatProfile =
 			await getCampaignsThreatProfile(STORAGE_DIR);
 		await saveData(
