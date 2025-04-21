@@ -117,6 +117,53 @@ export const getCampaignsQuery = `query Campaigns {
         }
     }
 }`;
+export const getCampaignsQueryWithThreatProfile = `query PrioritizedCampaignQuery($pageSize: Int!, $offset: Int! = 0, $orderBy: String!, $name_Icontains: String! = "", $origins: String! = "", $content: String! = "", $showOnlyWithExploits: Boolean! = false, $limitCampaigns: Boolean! = true, $techniqueMitreIds: String! = "", $softwareMitreIds: String! = "", $threatGroupsMitreIds: String! = "", $industries: [ThreatProfileIndustries]! = [], $countries: [ThreatProfileCountries]! = []) {
+  campaignOrigins
+  prioritizedCampaigns(
+    first: $pageSize
+    offset: $offset
+    orderBy: $orderBy
+    search: $name_Icontains
+    origins: $origins
+    content: $content
+    showOnlyWithExploits: $showOnlyWithExploits
+    limitCampaigns: $limitCampaigns
+    techniqueMitreIds: $techniqueMitreIds
+    softwareMitreIds: $softwareMitreIds
+    threatGroupsMitreIds: $threatGroupsMitreIds
+    industries: $industries
+    countries: $countries
+  ) {
+    totalCount
+    edges {
+      node {
+        id
+        name
+        origin
+        content
+        aliasNames
+        techniquesCount
+        softwareCount
+        threatGroupsCount
+        createdTimestamp
+        lastSeenTimestamp
+        vulnerabilityCveIds
+        vulnerabilityCount
+        assetCount
+        stixId
+        campaignId
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  industries {
+    label
+    value
+    __typename
+  }
+}`;
 
 export const getCampaignDetailQuery = `query CampaignDetail($id: ID!) {
     campaigns(id: $id) {

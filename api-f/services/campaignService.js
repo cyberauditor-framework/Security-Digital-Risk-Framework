@@ -4,6 +4,7 @@ import {
 } from "../providers/graphql/graphqlClient.js";
 import {
 	getCampaignsQuery,
+	getCampaignsQueryWithThreatProfile,
 	getCampaignDetailQuery,
 } from "../providers/graphql/querys/campaignsQuery.js";
 
@@ -82,6 +83,78 @@ export const getCampaigns = async () => {
 		campaigns: simplifiedCampaigns,
 		fullCampaigns: formattedCampaigns.campaigns,
 	};
+};
+
+export const getCampaignsWithThreatProfile = async () => {
+	const getCampaignsQueryVariable = {
+		offset: 0,
+		name_Icontains: "",
+		origins: "",
+		content: "0,100",
+		showOnlyWithExploits: false,
+		limitCampaigns: true,
+		techniqueMitreIds: "",
+		softwareMitreIds: "",
+		threatGroupsMitreIds: "",
+		industries: ["FINANCE_AND_INSURANCE"],
+		countries: ["DEU"],
+		pageSize: 100,
+		orderBy: "-createdTimestamp",
+	};
+
+	const rawCampaigns = await graphqlFetch(
+		ENDPOINT,
+		getCampaignsQueryWithThreatProfile,
+		getCampaignsQueryVariable,
+		HEADERS,
+	);
+
+	const formattedCampaigns = cleanGraphQLResponse(rawCampaigns);
+	console.log(
+		"test",
+		JSON.stringify(rawCampaigns.prioritizedCampaigns, null, 2),
+	);
+
+	if (
+		!formattedCampaigns ||
+		!formattedCampaigns.prioritizedCampaigns ||
+		formattedCampaigns.prioritizedCampaigns.length === 0
+	) {
+		console.log("Campaigns not found.");
+		return { campaigns: [], fullCampaigns: [] };
+	}
+
+	// Crear una versión simplificada para el JSON
+	const simplifiedCampaigns = formattedCampaigns.prioritizedCampaigns.map(
+		(campaign) => ({
+			id: campaign.id,
+			name: campaign.name,
+			stixId: campaign.stixId,
+			description: campaign.description,
+			deprecated: campaign.deprecated,
+			revoked: campaign.revoked,
+			createdTimestamp: campaign.createdTimestamp,
+			modifiedTimestamp: campaign.modifiedTimestamp,
+			update: campaign.update,
+			type: campaign.type,
+			origin: campaign.origin,
+			firstSeenTimestamp: campaign.firstSeenTimestamp,
+			lastSeenTimestamp: campaign.lastSeenTimestamp,
+			aliasNames: campaign.aliasNames,
+			techniquesCount: campaign.techniquesCount,
+			softwareCount: campaign.softwareCount,
+			threatGroupsCount: campaign.threatGroupsCount,
+			vulnerabilityCveIds: campaign.vulnerabilityCveIds,
+			vulnerabilitiesCount: campaign.vulnerabilitiesCount,
+			assetsCount: campaign.assetsCount,
+		}),
+	);
+
+	const result = {
+		campaigns: simplifiedCampaigns,
+		fullCampaigns: formattedCampaigns.prioritizedCampaigns,
+	};
+	return result;
 };
 
 export const getCampaignDetail = async (campaignId) => {
