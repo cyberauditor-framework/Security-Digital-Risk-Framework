@@ -110,7 +110,7 @@ const seedData = async () => {
 	const software = await getSoftware();
 	await saveData("software", software, STORAGE_DIR);
 
-	const threatGroups = await getThreatGroups();
+	const { threatGroups, fullThreatGroups } = await getThreatGroups();
 	await saveData("threatGroups", threatGroups, STORAGE_DIR);
 
 	const integrations = await getIntegrations();
@@ -201,6 +201,28 @@ const seedData = async () => {
 	await saveData(
 		"vulnerability_platforms",
 		vulnerabilityPlatformsRelations,
+		STORAGE_DIR,
+	);
+
+	// Relaciones de threat groups con techniques
+	const threatGroupTechniquesRelations = [];
+
+	// Process threat group to techniques relationship
+	for (const threatGroup of fullThreatGroups) {
+		if (threatGroup.techniques) {
+			threatGroup.techniques.forEach((technique) => {
+				threatGroupTechniquesRelations.push({
+					threat_group_id: threatGroup.mitreId,
+					technique_id: technique.mitreId,
+				});
+			});
+		}
+	}
+
+	// Save threat group to techniques relationship
+	await saveData(
+		"threatGroup_techniques",
+		threatGroupTechniquesRelations,
 		STORAGE_DIR,
 	);
 

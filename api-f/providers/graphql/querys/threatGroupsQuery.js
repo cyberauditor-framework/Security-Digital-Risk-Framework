@@ -8,6 +8,14 @@ export const getThreatGroupsQuery = `
           mitreId
           name
           description
+          techniques {
+            edges {
+              node {
+                mitreId
+                name
+              }
+            }
+          }
         }
       }
     }
