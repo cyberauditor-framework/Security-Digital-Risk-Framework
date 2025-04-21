@@ -75,6 +75,64 @@ export const campaignAnalysisDetections = async (storageDir = STORAGE_DIR) => {
 	return listCampaignsDetailsClient;
 };
 
+export const getThreatGroupData = async (
+	threatGroupId,
+	storageDir = STORAGE_DIR,
+) => {
+	// Load all required JSON files
+	const campaignThreatGroups = await loadData(
+		"campaign_threatGroups",
+		storageDir,
+	);
+	const campaigns = await loadData("campaigns", storageDir);
+	const threatGroupTechniques = await loadData(
+		"threatGroup_techniques",
+		storageDir,
+	);
+	const techniqueTactics = await loadData("technique_tactics", storageDir);
+
+	// Find campaigns related to this threat group
+	const relatedCampaignIds = campaignThreatGroups
+		.filter((relation) => relation.threat_group_id === threatGroupId)
+		.map((relation) => relation.campaign_id);
+
+	// Get campaign names
+	const relatedCampaigns = relatedCampaignIds.map((campaignId) => {
+		const campaign = campaigns.find((c) => c.id === campaignId);
+		return {
+			id: campaignId,
+			name: campaign ? campaign.name : "Unknown Campaign",
+		};
+	});
+
+	// Get techniques associated with this threat group
+	const relatedTechniques = threatGroupTechniques
+		.filter((relation) => relation.threat_group_id === threatGroupId)
+		.map((relation) => relation.technique_id);
+
+	// Map techniques to tactics
+	const techniquesWithTactics = relatedTechniques.map((techniqueId) => {
+		const tactics = techniqueTactics
+			.filter((relation) => relation.technique_id === techniqueId)
+			.map((relation) => relation.tactic_id);
+
+		return {
+			mitreTechniqueId: techniqueId,
+			tactics: tactics,
+		};
+	});
+
+	// Create final result
+	const result = {
+		threatGroupId,
+		campaigns: relatedCampaigns,
+		techniques: techniquesWithTactics,
+	};
+
+	console.log("Threat Group Data:", JSON.stringify(result, null, 2));
+	return result;
+};
+
 process.on("uncaughtException", (err) => {
 	console.error("Error no capturado:", err);
 	process.exit(1);
