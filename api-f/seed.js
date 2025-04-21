@@ -46,8 +46,8 @@ const seedData = async () => {
 		if (technique.tactics) {
 			technique.tactics.forEach((tactic) => {
 				techniqueTacticsRelations.push({
-					technique_id: technique.id,
-					tactic_id: tactic.id,
+					technique_id: technique.mitreId,
+					tactic_id: tactic.mitreId,
 				});
 			});
 		}
@@ -56,7 +56,7 @@ const seedData = async () => {
 		if (technique.platforms) {
 			technique.platforms.forEach((platform) => {
 				techniquePlatformsRelations.push({
-					technique_id: technique.id,
+					technique_id: technique.mitreId,
 					platform_id: platform.id,
 				});
 			});
@@ -66,8 +66,8 @@ const seedData = async () => {
 		if (technique.software) {
 			technique.software.forEach((sw) => {
 				techniqueSoftwareRelations.push({
-					technique_id: technique.id,
-					software_id: sw.id,
+					technique_id: technique.mitreId,
+					software_id: sw.mitreId,
 				});
 			});
 		}
@@ -76,7 +76,7 @@ const seedData = async () => {
 		if (technique.detections) {
 			technique.detections.forEach((detection) => {
 				techniqueDetectionsRelations.push({
-					technique_id: technique.id,
+					technique_id: technique.mitreId,
 					detection_id: detection.id,
 					effectiveness: 0, // Default value, can be updated later
 				});
@@ -132,7 +132,7 @@ const seedData = async () => {
 			campaign.techniques.forEach((technique) => {
 				campaignTechniquesRelations.push({
 					campaign_id: campaignId,
-					technique_id: technique.id,
+					technique_id: technique.mitreId,
 				});
 			});
 		}
@@ -142,7 +142,7 @@ const seedData = async () => {
 			campaign.software.forEach((sw) => {
 				campaignSoftwareRelations.push({
 					campaign_id: campaignId,
-					software_id: sw.id,
+					software_id: sw.mitreId,
 				});
 			});
 		}
@@ -152,7 +152,7 @@ const seedData = async () => {
 			campaign.threatGroups.forEach((threatGroup) => {
 				campaignThreatGroupsRelations.push({
 					campaign_id: campaignId,
-					threat_group_id: threatGroup.id,
+					threat_group_id: threatGroup.mitreId,
 				});
 			});
 		}
@@ -207,26 +207,28 @@ const seedData = async () => {
 	// Parse NIST800-53-CONTROLS.xlsx
 	const nistData = await parseFile(
 		"C:\\Users\\239834\\Documents\\Cyberproof\\2025-BOVEDA\\0.DISEÑO\\DATOS\\ANEXOS\\NIST800-53-CONTROLS.xlsx",
-		["Technique ID", "Technique Name"],
+		["Technique ID", "Technique Name", "Control ID"],
 	);
 
 	// Parse CISV8.CONTROLS.xlsx
 	const cisData = await parseFile(
 		"C:\\Users\\239834\\Documents\\Cyberproof\\2025-BOVEDA\\0.DISEÑO\\DATOS\\ANEXOS\\CISV8.CONTROLS.xlsx",
-		["Technique ID", "Technique Name"],
+		["Technique ID", "Technique Name", "Control ID"],
 	);
 
 	// Combine data into ttp-rel-standard.json format
 	const ttpRelStandard = [
 		...nistData.map((item) => ({
-			id: 1,
-			idMitre: item["Technique ID"],
+			id: "1",
+			idMitre: String(item["Technique ID"]),
 			standard: "NIST800",
+			controlId: String(item["Control ID"]),
 		})),
 		...cisData.map((item) => ({
-			id: 2,
-			idMitre: item["Technique ID"],
+			id: "2",
+			idMitre: String(item["Technique ID"]),
 			standard: "CISV8",
+			controlId: String(item["Control ID"]),
 		})),
 	];
 

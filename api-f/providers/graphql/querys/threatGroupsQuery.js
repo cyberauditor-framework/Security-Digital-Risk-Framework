@@ -5,7 +5,7 @@ export const getThreatGroupsQuery = `
       totalCount
       edges {
         node {
-          id
+          mitreId
           name
           description
         }

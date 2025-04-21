@@ -22,7 +22,7 @@ export const getSoftware = async () => {
 	//console.log(formattedSoftware);
 
 	const software = formattedSoftware.software.map((edge) => ({
-		id: edge.id,
+		id: edge.mitreId,
 		name: edge.name,
 		description: edge.description,
 	}));

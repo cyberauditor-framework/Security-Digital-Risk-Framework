@@ -16,10 +16,9 @@ export const getTactics = async () => {
 	const formattedTactics = cleanGraphQLResponse(rawTactics);
 
 	const tactics = formattedTactics.tactics.map((edge) => ({
-		id: edge.id,
+		mitreId: edge.mitreId,
 		name: edge.name,
 		description: edge.description,
-		mitreId: edge.mitreId,
 	}));
 
 	if (!tactics || tactics.length === 0) {

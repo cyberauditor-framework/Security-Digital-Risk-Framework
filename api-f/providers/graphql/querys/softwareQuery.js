@@ -5,7 +5,7 @@ export const getSoftwareQuery = `
       totalCount
       edges {
         node {
-          id
+          mitreId
           name
           description
         }

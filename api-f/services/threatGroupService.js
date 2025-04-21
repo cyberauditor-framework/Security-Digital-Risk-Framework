@@ -21,7 +21,7 @@ export const getThreatGroups = async () => {
 	const formattedThreatGroups = cleanGraphQLResponse(rawThreatGroups);
 
 	const threatGroups = formattedThreatGroups.threatGroups.map((edge) => ({
-		id: edge.id,
+		id: edge.mitreId,
 		name: edge.name,
 		description: edge.description,
 	}));
