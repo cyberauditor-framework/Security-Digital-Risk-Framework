@@ -630,19 +630,19 @@ process.on("unhandledRejection", (reason, promise) => {
 	try {
 		console.log("Inicializando index");
 
-		// await getThreatGroupData("G0099", STORAGE_DIR);
-		// const campaignSummary = await getCampaignsSummary(STORAGE_DIR);
-		// await saveData("campaign_summary", campaignSummary, "../db/results");
-		// const campaignId = "Q2FtcGFpZ25UeXBlOjcwNQ==";
-		// const campaignDetailInfo = await getCampaignDetailedInfo(
-		// 	campaignId,
-		// 	STORAGE_DIR,
-		// );
-		// await saveData(
-		// 	`campaign_detail_info_${campaignId}`,
-		// 	campaignDetailInfo,
-		// 	"../db/results",
-		// );
+		await getThreatGroupData("G0099", STORAGE_DIR);
+		const campaignSummary = await getCampaignsSummary(STORAGE_DIR);
+		await saveData("campaign_summary", campaignSummary, "../db/results");
+		const campaignId = "Q2FtcGFpZ25UeXBlOjcwNQ==";
+		const campaignDetailInfo = await getCampaignDetailedInfo(
+			campaignId,
+			STORAGE_DIR,
+		);
+		await saveData(
+			`campaign_detail_info_${campaignId}`,
+			campaignDetailInfo,
+			"../db/results",
+		);
 		// const campaignsWithThreatProfile = await getCampaignsWithThreatProfile();
 		// await saveData(
 		// 	"campaign_with_threat_profile",
