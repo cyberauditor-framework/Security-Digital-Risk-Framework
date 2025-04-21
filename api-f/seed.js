@@ -228,7 +228,8 @@ const seedData = async () => {
 
 	// Parse NIST800-53-CONTROLS.xlsx
 	const nistData = await parseFile(
-		"C:\\Users\\239834\\Documents\\Cyberproof\\2025-BOVEDA\\0.DISEÑO\\DATOS\\ANEXOS\\NIST800-53-CONTROLS.xlsx",
+		// "C:\\Users\\239834\\Documents\\Cyberproof\\2025-BOVEDA\\0.DISEÑO\\DATOS\\ANEXOS\\NIST800-53-CONTROLS.xlsx",
+		"C:\\Users\\239846\\Documents\\Cyberproof\\Obsidian_Vault\\DOCUMENTACION\\DOCUMENTACION\\2025-BOVEDA\\2025-BOVEDA\\0.DISEÑO\\DATOS\\ANEXOS\\NIST800-53-CONTROLS.xlsx",
 		[
 			"Technique ID",
 			"Technique Name",
@@ -240,7 +241,8 @@ const seedData = async () => {
 
 	// Parse CISV8.CONTROLS.xlsx
 	const cisData = await parseFile(
-		"C:\\Users\\239834\\Documents\\Cyberproof\\2025-BOVEDA\\0.DISEÑO\\DATOS\\ANEXOS\\CISV8.CONTROLS.xlsx",
+		// "C:\\Users\\239834\\Documents\\Cyberproof\\2025-BOVEDA\\0.DISEÑO\\DATOS\\ANEXOS\\CISV8.CONTROLS.xlsx",
+		"C:\\Users\\239846\\Documents\\Cyberproof\\Obsidian_Vault\\DOCUMENTACION\\DOCUMENTACION\\2025-BOVEDA\\2025-BOVEDA\\0.DISEÑO\\DATOS\\ANEXOS\\CISV8.CONTROLS.xlsx",
 		[
 			"Technique ID",
 			"Technique Name",
