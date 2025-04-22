@@ -1,5 +1,5 @@
-export const getCampaignsQuery = `query Campaigns($offset: Int, $pageSize: Int) {
-    campaigns(offset: $offset, first: $pageSize) {
+export const getCampaignsQuery = `query PrioritizedCampaigns($pageSize: Int! = 10, $offset: Int! = 0) {
+    prioritizedCampaigns(first: $pageSize, offset: $offset) {
         count
         totalCount
         pageInfo {
@@ -12,139 +12,139 @@ export const getCampaignsQuery = `query Campaigns($offset: Int, $pageSize: Int) 
             node {
                 id
                 name
-                stixId
                 description
+                createdTimestamp
+                lastSeenTimestamp
+                firstSeenTimestamp
+                origin
+                priority
+                content
+                vulnerabilityCount
+                assetCount
+                stixId
                 deprecated
                 revoked
-                createdTimestamp
                 modifiedTimestamp
-                update
-                type
-                origin
-                firstSeenTimestamp
-                lastSeenTimestamp
                 aliasNames
-                techniquesCount
-                softwareCount
-                threatGroupsCount
                 vulnerabilityCveIds
-                vulnerabilitiesCount
-                assetsCount
-                techniques {
-                    count
-                    totalCount
-                    pageInfo {
-                        hasNextPage
-                        hasPreviousPage
-                        startCursor
-                        endCursor
-                    }
-                    edges {
-                        node {
-                            id
-                            name
-                            stixId
-                            description
-                            deprecated
-                            createdTimestamp
-                            modifiedTimestamp
-                            update
-                            mitreId
-                            universalPriority
-                            subtechnique
-                            priority
-                            content
+                threatGroupsCount
+                softwareCount
+                techniquesCount
+                referenceUrls
+                campaignId
+                industries
+                countries
+                campaign {
+                    id
+                    name
+                    stixId
+                    description
+                    deprecated
+                    revoked
+                    createdTimestamp
+                    modifiedTimestamp
+                    update
+                    type
+                    origin
+                    firstSeenTimestamp
+                    lastSeenTimestamp
+                    aliasNames
+                    techniquesCount
+                    softwareCount
+                    threatGroupsCount
+                    vulnerabilityCveIds
+                    vulnerabilitiesCount
+                    referenceUrls
+                    assetsCount
+                    techniques {
+                        count
+                        totalCount
+                        edges {
+                            node {
+                                id
+                                name
+                                stixId
+                                description
+                                deprecated
+                                createdTimestamp
+                                modifiedTimestamp
+                                update
+                                mitreId
+                                universalPriority
+                                subtechnique
+                                priority
+                                content
+                            }
                         }
-                        cursor
                     }
-                }
-                software {
-                    count
-                    totalCount
-                    pageInfo {
-                        hasNextPage
-                        hasPreviousPage
-                        startCursor
-                        endCursor
-                    }
-                    edges {
-                        node {
-                            id
-                            name
-                            stixId
-                            description
-                            deprecated
-                            revoked
-                            createdTimestamp
-                            modifiedTimestamp
-                            update
-                            softwareType
-                            mitreId
-                            universalPriority
-                            priority
-                            content
+                    software {
+                        count
+                        totalCount
+                        edges {
+                            node {
+                                id
+                                name
+                                stixId
+                                description
+                                deprecated
+                                revoked
+                                createdTimestamp
+                                modifiedTimestamp
+                                update
+                                softwareType
+                                mitreId
+                                universalPriority
+                                priority
+                                content
+                            }
                         }
-                        cursor
                     }
-                }
-                vulnerabilities {
-                    count
-                    totalCount
-                    pageInfo {
-                        hasNextPage
-                        hasPreviousPage
-                        startCursor
-                        endCursor
-                    }
-                    edges {
-                        node {
-                            id
-                            name
-                            stixId
-                            description
-                            universalPriority
-                            awarenessLevel
-                            title
-                            cveId
-                            cvssSeverityScore
-                            cvssSeverityScoreVersion
-                            nistImpactScore
-                            nistExploitabilityScore
-                            epssExploitabilityScore
-                            epssExploitabilityPercentile
-                            configurations
-                            assetsCount
-                            configuration
+                    vulnerabilities {
+                        count
+                        totalCount
+                        edges {
+                            cursor
+                            node {
+                                id
+                                name
+                                stixId
+                                description
+                                universalPriority
+                                awarenessLevel
+                                title
+                                cveId
+                                cvssSeverityScore
+                                cvssSeverityScoreVersion
+                                nistImpactScore
+                                nistExploitabilityScore
+                                epssExploitabilityScore
+                                epssExploitabilityPercentile
+                                configurations
+                                assetsCount
+                                configuration
+                            }
                         }
-                        cursor
                     }
-                }
-                threatGroups {
-                    count
-                    totalCount
-                    pageInfo {
-                        hasNextPage
-                        hasPreviousPage
-                        startCursor
-                        endCursor
-                    }
-                    edges {
-                        node {
-                            id
-                            name
-                            stixId
-                            description
-                            deprecated
-                            revoked
-                            createdTimestamp
-                            modifiedTimestamp
-                            update
-                            mitreId
-                            universalPriority
-                            priority
-                            content
+                    threatGroups {
+                        count
+                        totalCount
+                        edges {
+                            node {
+                                id
+                                name
+                                stixId
+                                description
+                                deprecated
+                                revoked
+                                createdTimestamp
+                                modifiedTimestamp
+                                update
+                                mitreId
+                                universalPriority
+                                priority
+                                content
+                            }
                         }
-                        cursor
                     }
                 }
             }

@@ -17,24 +17,18 @@ const HEADERS = {
 export const getCampaigns = async () => {
 	const getCampaignsQueryVariable = {
 		offset: 0,
-		searchNameOrMitreId: "",
-		tacticNames: "",
-		integrationNames: "",
-		platformNames: "",
-		priority: "",
+		name_Icontains: "",
+		origins: "",
 		content: "",
-		mitreIds: "",
-		campaignStixIds: "",
+		showOnlyWithExploits: false,
+		limitCampaigns: false,
+		techniqueMitreIds: "",
 		softwareMitreIds: "",
-		threatGroupMitreIds: "",
-		telemetrySubcategoryNames: "",
-		controlStixIds: "",
-		telemetrySubcategoryId: "",
-		countries: [],
+		threatGroupsMitreIds: "",
 		industries: [],
+		countries: [],
 		pageSize: 100,
-		domainName: "",
-		orderBy: "-priority",
+		orderBy: "-createdTimestamp",
 	};
 
 	console.log("Fetching campaigns with pagination...");
@@ -49,8 +43,8 @@ export const getCampaigns = async () => {
 
 	if (
 		!formattedCampaigns ||
-		!formattedCampaigns.campaigns ||
-		formattedCampaigns.campaigns.length === 0
+		!formattedCampaigns.prioritizedCampaigns ||
+		formattedCampaigns.prioritizedCampaigns.length === 0
 	) {
 		console.log("Campaigns not found.");
 		return { campaigns: [], fullCampaigns: [] };
@@ -58,36 +52,41 @@ export const getCampaigns = async () => {
 
 	// Log the total campaigns vs fetched campaigns
 	console.log(
-		`Successfully fetched ${formattedCampaigns.campaigns.length} campaigns out of ${rawCampaigns.campaigns.totalCount} total campaigns`,
+		`Successfully fetched ${formattedCampaigns.prioritizedCampaigns.length} campaigns out of ${rawCampaigns.prioritizedCampaigns.totalCount} total campaigns`,
 	);
 
 	// Crear una versión simplificada para el JSON
-	const simplifiedCampaigns = formattedCampaigns.campaigns.map((campaign) => ({
-		id: campaign.id,
-		name: campaign.name,
-		stixId: campaign.stixId,
-		description: campaign.description,
-		deprecated: campaign.deprecated,
-		revoked: campaign.revoked,
-		createdTimestamp: campaign.createdTimestamp,
-		modifiedTimestamp: campaign.modifiedTimestamp,
-		update: campaign.update,
-		type: campaign.type,
-		origin: campaign.origin,
-		firstSeenTimestamp: campaign.firstSeenTimestamp,
-		lastSeenTimestamp: campaign.lastSeenTimestamp,
-		aliasNames: campaign.aliasNames,
-		techniquesCount: campaign.techniquesCount,
-		softwareCount: campaign.softwareCount,
-		threatGroupsCount: campaign.threatGroupsCount,
-		vulnerabilityCveIds: campaign.vulnerabilityCveIds,
-		vulnerabilitiesCount: campaign.vulnerabilitiesCount,
-		assetsCount: campaign.assetsCount,
-	}));
+	const simplifiedCampaigns = formattedCampaigns.prioritizedCampaigns.map(
+		(campaign) => ({
+			id: campaign.campaign?.id || campaign.id,
+			interpressId: campaign.id,
+			name: campaign.name,
+			stixId: campaign.stixId,
+			description: campaign.description,
+			deprecated: campaign.deprecated,
+			revoked: campaign.revoked,
+			createdTimestamp: campaign.createdTimestamp,
+			modifiedTimestamp: campaign.modifiedTimestamp,
+			update: campaign.update,
+			type: campaign.type,
+			origin: campaign.origin,
+			firstSeenTimestamp: campaign.firstSeenTimestamp,
+			lastSeenTimestamp: campaign.lastSeenTimestamp,
+			aliasNames: campaign.aliasNames,
+			techniquesCount: campaign.techniquesCount,
+			softwareCount: campaign.softwareCount,
+			threatGroupsCount: campaign.threatGroupsCount,
+			vulnerabilityCveIds: campaign.vulnerabilityCveIds,
+			vulnerabilitiesCount: campaign.vulnerabilitiesCount,
+			assetsCount: campaign.assetsCount,
+		}),
+	);
 
 	return {
 		campaigns: simplifiedCampaigns,
-		fullCampaigns: formattedCampaigns.campaigns,
+		fullCampaigns: formattedCampaigns.prioritizedCampaigns
+			.map((campaign) => campaign.campaign)
+			.filter(Boolean),
 	};
 };
 
@@ -133,7 +132,8 @@ export const getCampaignsWithThreatProfile = async () => {
 	// Crear una versión simplificada para el JSON
 	const simplifiedCampaigns = formattedCampaigns.prioritizedCampaigns.map(
 		(campaign) => ({
-			id: campaign.id,
+			id: campaign.campaign?.id || campaign.id,
+			interpressId: campaign.id,
 			name: campaign.name,
 			stixId: campaign.stixId,
 			description: campaign.description,
@@ -158,7 +158,9 @@ export const getCampaignsWithThreatProfile = async () => {
 
 	const result = {
 		campaigns: simplifiedCampaigns,
-		fullCampaigns: formattedCampaigns.prioritizedCampaigns,
+		fullCampaigns: formattedCampaigns.prioritizedCampaigns
+			.map((campaign) => campaign.campaign)
+			.filter(Boolean),
 	};
 	return result;
 };
