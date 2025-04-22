@@ -1,0 +1,20 @@
+{
+	"name": "db-load-json",
+	"version": "1.0.0",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"seed": "node --env-file=.env seed.js"
+	},
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"type": "module",
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4"
+	},
+	"dependencies": {
+		"csv-parse": "^5.6.0",
+		"xlsx": "^0.18.5"
+	}
+}
