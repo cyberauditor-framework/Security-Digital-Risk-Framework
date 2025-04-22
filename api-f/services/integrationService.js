@@ -11,14 +11,20 @@ const HEADERS = {
 };
 
 export const getIntegrations = async () => {
+	console.log("Fetching integrations with pagination...");
 	const rawIntegrations = await graphqlFetch(
 		ENDPOINT,
 		getIntegrationsQuery,
-		{},
+		{ offset: 0, pageSize: 100 },
 		HEADERS,
 	);
 
 	const formattedIntegrations = cleanGraphQLResponse(rawIntegrations);
+
+	// Log the total vs fetched count
+	console.log(
+		`Successfully fetched ${formattedIntegrations.integrations.length} integrations out of ${rawIntegrations.integrations.totalCount} total`,
+	);
 
 	const integrations = formattedIntegrations.integrations.map((edge) => ({
 		id: edge.id,

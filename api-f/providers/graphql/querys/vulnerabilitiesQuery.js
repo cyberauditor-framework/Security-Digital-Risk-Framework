@@ -1,8 +1,14 @@
 export const getVulnerabilitiesQuery = `
-  query Vulnerabilities {
-    vulnerabilities {
+  query Vulnerabilities($offset: Int, $pageSize: Int) {
+    vulnerabilities(offset: $offset, first: $pageSize) {
         count
         totalCount
+        pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
+        }
         edges {
             node {
                 id
@@ -23,15 +29,23 @@ export const getVulnerabilitiesQuery = `
                 platforms {
                     count
                     totalCount
+                    pageInfo {
+                        hasNextPage
+                        hasPreviousPage
+                        startCursor
+                        endCursor
+                    }
                     edges {
                         node {
                             id
                             name
                             description
                         }
+                        cursor
                     }
                 }
             }
+            cursor
         }
     }
   }

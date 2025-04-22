@@ -32,11 +32,12 @@ export const getCampaigns = async () => {
 		telemetrySubcategoryId: "",
 		countries: [],
 		industries: [],
-		pageSize: 10,
+		pageSize: 100,
 		domainName: "",
 		orderBy: "-priority",
 	};
 
+	console.log("Fetching campaigns with pagination...");
 	const rawCampaigns = await graphqlFetch(
 		ENDPOINT,
 		getCampaignsQuery,
@@ -54,6 +55,11 @@ export const getCampaigns = async () => {
 		console.log("Campaigns not found.");
 		return { campaigns: [], fullCampaigns: [] };
 	}
+
+	// Log the total campaigns vs fetched campaigns
+	console.log(
+		`Successfully fetched ${formattedCampaigns.campaigns.length} campaigns out of ${rawCampaigns.campaigns.totalCount} total campaigns`,
+	);
 
 	// Crear una versión simplificada para el JSON
 	const simplifiedCampaigns = formattedCampaigns.campaigns.map((campaign) => ({

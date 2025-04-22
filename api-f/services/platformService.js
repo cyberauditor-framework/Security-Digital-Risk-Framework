@@ -11,14 +11,20 @@ const HEADERS = {
 };
 
 export const getPlatforms = async () => {
+	console.log("Fetching platforms with pagination...");
 	const rawPlatforms = await graphqlFetch(
 		ENDPOINT,
 		getPlatformsQuery,
-		{},
+		{ offset: 0, pageSize: 100 },
 		HEADERS,
 	);
 
 	const formattedPlatforms = cleanGraphQLResponse(rawPlatforms);
+
+	// Log the total vs fetched count
+	console.log(
+		`Successfully fetched ${formattedPlatforms.platforms.length} platforms out of ${rawPlatforms.platforms.totalCount} total`,
+	);
 
 	const platforms = formattedPlatforms.platforms.map((edge) => ({
 		id: edge.id,

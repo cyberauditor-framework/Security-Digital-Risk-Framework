@@ -1,8 +1,14 @@
 export const getIntegrationsQuery = `
-  query Integrations {
-    integrations {
+  query Integrations($offset: Int, $pageSize: Int) {
+    integrations(offset: $offset, first: $pageSize) {
       count
       totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
       edges {
         node {
           id
@@ -10,6 +16,7 @@ export const getIntegrationsQuery = `
           uuid
           description
         }
+        cursor
       }
     }
   }

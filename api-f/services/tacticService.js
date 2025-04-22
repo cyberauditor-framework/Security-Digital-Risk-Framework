@@ -11,9 +11,19 @@ const HEADERS = {
 };
 
 export const getTactics = async () => {
-	const rawTactics = await graphqlFetch(ENDPOINT, getTacticsQuery, {}, HEADERS);
+	console.log("Fetching tactics with pagination...");
+	const rawTactics = await graphqlFetch(
+		ENDPOINT,
+		getTacticsQuery,
+		{ offset: 0, pageSize: 100 },
+		HEADERS,
+	);
 
 	const formattedTactics = cleanGraphQLResponse(rawTactics);
+
+	console.log(
+		`Successfully fetched ${formattedTactics.tactics.length} tactics out of ${rawTactics.tactics.totalCount} total`,
+	);
 
 	const tactics = formattedTactics.tactics.map((edge) => ({
 		mitreId: edge.mitreId,

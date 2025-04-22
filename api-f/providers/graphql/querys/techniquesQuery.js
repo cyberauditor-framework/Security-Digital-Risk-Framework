@@ -1,7 +1,13 @@
-export const getTechniquesQuery = `query Techniques {
-    techniques {
+export const getTechniquesQuery = `query Techniques($offset: Int, $pageSize: Int) {
+    techniques(offset: $offset, first: $pageSize) {
         count
         totalCount
+        pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
+        }
         edges {
             node {
                 id
@@ -20,6 +26,12 @@ export const getTechniquesQuery = `query Techniques {
                 tactics {
                     count
                     totalCount
+                    pageInfo {
+                        hasNextPage
+                        hasPreviousPage
+                        startCursor
+                        endCursor
+                    }
                     edges {
                         node {
                             name
@@ -27,11 +39,18 @@ export const getTechniquesQuery = `query Techniques {
                             mitreId
                             id
                         }
+                        cursor
                     }
                 }
                 detections {
                     count
                     totalCount
+                    pageInfo {
+                        hasNextPage
+                        hasPreviousPage
+                        startCursor
+                        endCursor
+                    }
                     edges {
                         node {
                             id
@@ -59,22 +78,36 @@ export const getTechniquesQuery = `query Techniques {
                             softwareCount
                             threatGroupsCount
                         }
+                        cursor
                     }
                 }
                 platforms {
                     count
                     totalCount
+                    pageInfo {
+                        hasNextPage
+                        hasPreviousPage
+                        startCursor
+                        endCursor
+                    }
                     edges {
                         node {
                             id
                             name
                             description
                         }
+                        cursor
                     }
                 }
                 software {
                     count
                     totalCount
+                    pageInfo {
+                        hasNextPage
+                        hasPreviousPage
+                        startCursor
+                        endCursor
+                    }
                     edges {
                         node {
                             id
@@ -92,9 +125,11 @@ export const getTechniquesQuery = `query Techniques {
                             priority
                             content
                         }
+                        cursor
                     }
                 }
             }
+            cursor
         }
     }
 }`;

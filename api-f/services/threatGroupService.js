@@ -11,15 +11,20 @@ const HEADERS = {
 };
 
 export const getThreatGroups = async () => {
+	console.log("Fetching threat groups with pagination...");
 	const rawThreatGroups = await graphqlFetch(
 		ENDPOINT,
 		getThreatGroupsQuery,
-		{},
+		{ offset: 0, pageSize: 100 },
 		HEADERS,
 	);
 
 	const formattedThreatGroups = cleanGraphQLResponse(rawThreatGroups);
-	//console.log(formattedThreatGroups);
+
+	// Log the total vs fetched count
+	console.log(
+		`Successfully fetched ${formattedThreatGroups.threatGroups.length} threat groups out of ${rawThreatGroups.threatGroups.totalCount} total`,
+	);
 
 	// Format simplified threat groups for normal use
 	const threatGroups = formattedThreatGroups.threatGroups.map(

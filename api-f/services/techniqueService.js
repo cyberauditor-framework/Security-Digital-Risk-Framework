@@ -28,11 +28,12 @@ export const getTechniques = async () => {
 		telemetrySubcategoryId: "",
 		countries: [],
 		industries: [],
-		pageSize: 10,
+		pageSize: 100,
 		domainName: "",
 		orderBy: "-priority",
 	};
 
+	console.log("Fetching techniques with pagination...");
 	const rawTechniques = await graphqlFetch(
 		ENDPOINT,
 		getTechniquesQuery,
@@ -50,6 +51,11 @@ export const getTechniques = async () => {
 		console.log("Techniques not found.");
 		return { techniques: [], fullTechniques: [] };
 	}
+
+	// Log the total vs fetched count
+	console.log(
+		`Successfully fetched ${formattedTechniques.techniques.length} techniques out of ${rawTechniques.techniques.totalCount} total`,
+	);
 
 	// Crear una versión simplificada para el JSON
 	const simplifiedTechniques = formattedTechniques.techniques.map(

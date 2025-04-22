@@ -11,15 +11,20 @@ const HEADERS = {
 };
 
 export const getSoftware = async () => {
+	console.log("Fetching software with pagination...");
 	const rawSoftware = await graphqlFetch(
 		ENDPOINT,
 		getSoftwareQuery,
-		{},
+		{ offset: 0, pageSize: 100 },
 		HEADERS,
 	);
 
 	const formattedSoftware = cleanGraphQLResponse(rawSoftware);
-	//console.log(formattedSoftware);
+
+	// Log the total vs fetched count
+	console.log(
+		`Successfully fetched ${formattedSoftware.software.length} software items out of ${rawSoftware.software.totalCount} total`,
+	);
 
 	const software = formattedSoftware.software.map((edge) => ({
 		id: edge.mitreId,

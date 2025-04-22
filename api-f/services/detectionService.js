@@ -28,11 +28,12 @@ export const getDetections = async () => {
 		telemetrySubcategoryId: "",
 		countries: [],
 		industries: [],
-		pageSize: 10,
+		pageSize: 100,
 		domainName: "",
 		orderBy: "-priority",
 	};
 
+	console.log("Fetching detections with pagination...");
 	const rawDetections = await graphqlFetch(
 		ENDPOINT,
 		getDetectionsQuery,
@@ -50,6 +51,11 @@ export const getDetections = async () => {
 		console.log("Detections not found.");
 		return [];
 	}
+
+	// Log the total vs fetched count
+	console.log(
+		`Successfully fetched ${formattedDetections.detections.length} detections out of ${rawDetections.detections.totalCount} total`,
+	);
 
 	return formattedDetections.detections;
 };

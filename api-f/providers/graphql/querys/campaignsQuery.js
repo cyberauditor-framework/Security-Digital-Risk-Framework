@@ -1,7 +1,13 @@
-export const getCampaignsQuery = `query Campaigns {
-    campaigns {
+export const getCampaignsQuery = `query Campaigns($offset: Int, $pageSize: Int) {
+    campaigns(offset: $offset, first: $pageSize) {
         count
         totalCount
+        pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
+        }
         edges {
             node {
                 id
@@ -27,6 +33,12 @@ export const getCampaignsQuery = `query Campaigns {
                 techniques {
                     count
                     totalCount
+                    pageInfo {
+                        hasNextPage
+                        hasPreviousPage
+                        startCursor
+                        endCursor
+                    }
                     edges {
                         node {
                             id
@@ -43,11 +55,18 @@ export const getCampaignsQuery = `query Campaigns {
                             priority
                             content
                         }
+                        cursor
                     }
                 }
                 software {
                     count
                     totalCount
+                    pageInfo {
+                        hasNextPage
+                        hasPreviousPage
+                        startCursor
+                        endCursor
+                    }
                     edges {
                         node {
                             id
@@ -65,11 +84,18 @@ export const getCampaignsQuery = `query Campaigns {
                             priority
                             content
                         }
+                        cursor
                     }
                 }
                 vulnerabilities {
                     count
                     totalCount
+                    pageInfo {
+                        hasNextPage
+                        hasPreviousPage
+                        startCursor
+                        endCursor
+                    }
                     edges {
                         node {
                             id
@@ -90,11 +116,18 @@ export const getCampaignsQuery = `query Campaigns {
                             assetsCount
                             configuration
                         }
+                        cursor
                     }
                 }
                 threatGroups {
                     count
                     totalCount
+                    pageInfo {
+                        hasNextPage
+                        hasPreviousPage
+                        startCursor
+                        endCursor
+                    }
                     edges {
                         node {
                             id
@@ -111,9 +144,11 @@ export const getCampaignsQuery = `query Campaigns {
                             priority
                             content
                         }
+                        cursor
                     }
                 }
             }
+            cursor
         }
     }
 }`;
