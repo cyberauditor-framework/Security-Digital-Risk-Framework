@@ -1,4 +1,5 @@
 import reactLogo from "./assets/react.svg";
+import { Button } from "./components/ui/button";
 import viteLogo from "/vite.svg";
 
 function App() {
