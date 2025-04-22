@@ -1,4 +1,4 @@
-import { initStorage, saveData } from "../persistence/jsonPersistence.js";
+import { initStorage, saveData } from "./persistence/jsonPersistence.js";
 
 import { getCampaigns } from "./services/campaignService.js";
 import { getTechniques } from "./services/techniqueService.js";
@@ -20,7 +20,7 @@ import { getTechniqueTacticsRelation } from "./services/relations/techniqueTacti
 import { getSoftwareTechniquesRelation } from "./services/relations/softwareTechniqueService.js";
 import { getThreatGroupTechniquesRelation } from "./services/relations/threatGroupTechniqueService.js";
 
-const STORAGE_DIR = "../db/common";
+const STORAGE_DIR = "./db/common";
 
 const seedData = async () => {
 	try {
