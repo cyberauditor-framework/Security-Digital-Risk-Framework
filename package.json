@@ -21,5 +21,9 @@
 	"homepage": "https://github.com/cyberauditor-framework/portal#readme",
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4"
+	},
+	"dependencies": {
+		"@tailwindcss/vite": "^4.1.4",
+		"tailwindcss": "^4.1.4"
 	}
 }
