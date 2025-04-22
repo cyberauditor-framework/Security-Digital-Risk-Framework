@@ -255,8 +255,8 @@ const fetchAllPages = async (
 
 		// Safety check to prevent infinite loops
 		if (
-			result.edges.length >= (nextPageField.totalCount || 10000) ||
-			pagesCount > 100
+			result.edges.length >= (nextPageField.totalCount || 40000) ||
+			pagesCount > 4000
 		) {
 			console.log(`Reached data limit or max pages for ${fieldName}`);
 			break;
