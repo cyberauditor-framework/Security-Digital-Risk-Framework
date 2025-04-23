@@ -10,7 +10,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const readJsonFile = async (filename) => {
 	try {
 		// Try to load using jsonPersistence first
-		const jsonPath = path.join(__dirname, "..", "db-json", "common");
+		const jsonPath = path.join(
+			__dirname,
+			"../db-load-json",
+			"db-json",
+			"common",
+		);
 		const data = await loadData(filename.replace(".json", ""), jsonPath);
 		if (data) return data;
 

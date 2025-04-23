@@ -48,12 +48,29 @@ export async function findWithTechniques(id) {
 
 		const threatGroup = threatGroupResult.rows[0];
 
-		// Obtener técnicas asociadas
+		// Obtener técnicas asociadas con sus tácticas
 		const techniquesResult = await client.query(
-			`SELECT t.* 
-       FROM techniques t
-       JOIN threat_group_technique tgt ON t.mitre_id = tgt.technique_id
-       WHERE tgt.threat_group_id = $1`,
+			`WITH technique_tactics AS (
+                SELECT t.*, 
+                       json_agg(
+                           json_build_object(
+                               'mitre_id', tac.mitre_id,
+                               'name', tac.name,
+                               'description', tac.description
+                           )
+                       ) as tactics
+                FROM techniques t
+                LEFT JOIN technique_tactic tt ON t.mitre_id = tt.technique_id
+                LEFT JOIN tactics tac ON tt.tactic_id = tac.mitre_id
+                WHERE EXISTS (
+                    SELECT 1 
+                    FROM threat_group_technique tgt 
+                    WHERE tgt.technique_id = t.mitre_id 
+                    AND tgt.threat_group_id = $1
+                )
+                GROUP BY t.mitre_id, t.name, t.description
+            )
+            SELECT * FROM technique_tactics`,
 			[id],
 		);
 
