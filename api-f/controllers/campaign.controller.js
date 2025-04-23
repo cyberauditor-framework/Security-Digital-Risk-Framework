@@ -1,11 +1,39 @@
 import * as campaignModel from "../models/campaign.model.js";
 
 /**
- * Obtener todas las campañas
+ * Obtener todas las campañas o filtrarlas por países e industrias
  */
 export async function getAllCampaigns(req, res, next) {
 	try {
-		const campaigns = await campaignModel.findAll();
+		let campaigns;
+
+		// Verificar si hay filtros de países o industrias
+		const { countries, industries } = req.query;
+
+		if (
+			(countries && countries.length > 0) ||
+			(industries && industries.length > 0)
+		) {
+			// Convertir a arrays si son strings
+			const countriesArr = countries
+				? Array.isArray(countries)
+					? countries
+					: [countries]
+				: [];
+			const industriesArr = industries
+				? Array.isArray(industries)
+					? industries
+					: [industries]
+				: [];
+
+			campaigns = await campaignModel.findByFilters(
+				countriesArr,
+				industriesArr,
+			);
+		} else {
+			campaigns = await campaignModel.findAll();
+		}
+
 		res.json({ success: true, data: campaigns });
 	} catch (error) {
 		next(error);
@@ -99,6 +127,44 @@ export async function getCampaignWithVulnerabilities(req, res, next) {
 			throw error;
 		}
 		res.json({ success: true, data: campaignWithVulnerabilities });
+	} catch (error) {
+		next(error);
+	}
+}
+
+/**
+ * Obtener una campaña con sus países asociados
+ */
+export async function getCampaignWithCountries(req, res, next) {
+	try {
+		const campaignWithCountries = await campaignModel.findWithCountries(
+			req.params.id,
+		);
+		if (!campaignWithCountries) {
+			const error = new Error("Campaña no encontrada");
+			error.status = 404;
+			throw error;
+		}
+		res.json({ success: true, data: campaignWithCountries });
+	} catch (error) {
+		next(error);
+	}
+}
+
+/**
+ * Obtener una campaña con sus industrias asociadas
+ */
+export async function getCampaignWithIndustries(req, res, next) {
+	try {
+		const campaignWithIndustries = await campaignModel.findWithIndustries(
+			req.params.id,
+		);
+		if (!campaignWithIndustries) {
+			const error = new Error("Campaña no encontrada");
+			error.status = 404;
+			throw error;
+		}
+		res.json({ success: true, data: campaignWithIndustries });
 	} catch (error) {
 		next(error);
 	}

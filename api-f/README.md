@@ -52,6 +52,17 @@ threat_groups_count INTEGER
 
 );
 
+-- Tabla de países
+CREATE TABLE countries (
+value VARCHAR(255) PRIMARY KEY, -- corresponde a "value" en countries.json
+label VARCHAR(255) NOT NULL
+);
+
+-- Tabla de industrias
+CREATE TABLE industries (
+value VARCHAR(255) PRIMARY KEY, -- corresponde a "value" en industries.json
+label VARCHAR(255) NOT NULL
+);
   
 
 -- Tabla de detecciones
@@ -308,6 +319,18 @@ PRIMARY KEY (campaign_id, vulnerability_id)
 
 );
 
+-- Tablas de unión para campañas con industrias y países
+CREATE TABLE campaign_industry (
+campaign_id VARCHAR(255) REFERENCES campaigns(id) ON DELETE CASCADE,
+industry_id VARCHAR(255) REFERENCES industries(value) ON DELETE CASCADE,
+PRIMARY KEY (campaign_id, industry_id)
+);
+
+CREATE TABLE campaign_country (
+campaign_id VARCHAR(255) REFERENCES campaigns(id) ON DELETE CASCADE,
+country_id VARCHAR(255) REFERENCES countries(value) ON DELETE CASCADE,
+PRIMARY KEY (campaign_id, country_id)
+);
   
 
 -- Tablas de unión para técnicas

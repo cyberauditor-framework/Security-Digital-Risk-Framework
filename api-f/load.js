@@ -771,6 +771,50 @@ export async function loadAllData() {
 			results.errors.push({ table: "threat_groups", error: error.message });
 		}
 
+		// Load countries
+		console.log("Loading countries...");
+		try {
+			const countries = await readJsonFile("countries.json");
+			// Mapear campos del JSON a columnas de PostgreSQL
+			const mappedCountries = countries.map((item) =>
+				mapJsonToDbFields(item, fieldMappings),
+			);
+			await batchInsert(
+				client,
+				"countries",
+				mappedCountries,
+				["value", "label"],
+				"value",
+			);
+			results.tables.countries = { loaded: true };
+		} catch (error) {
+			console.error("Failed to load countries:", error);
+			results.tables.countries = { loaded: false, error: error.message };
+			results.errors.push({ table: "countries", error: error.message });
+		}
+
+		// Load industries
+		console.log("Loading industries...");
+		try {
+			const industries = await readJsonFile("industries.json");
+			// Mapear campos del JSON a columnas de PostgreSQL
+			const mappedIndustries = industries.map((item) =>
+				mapJsonToDbFields(item, fieldMappings),
+			);
+			await batchInsert(
+				client,
+				"industries",
+				mappedIndustries,
+				["value", "label"],
+				"value",
+			);
+			results.tables.industries = { loaded: true };
+		} catch (error) {
+			console.error("Failed to load industries:", error);
+			results.tables.industries = { loaded: false, error: error.message };
+			results.errors.push({ table: "industries", error: error.message });
+		}
+
 		// Load vulnerabilities
 		console.log("Loading vulnerabilities...");
 		try {
@@ -1035,6 +1079,52 @@ export async function loadAllData() {
 			};
 			results.errors.push({
 				table: "campaign_vulnerability",
+				error: error.message,
+			});
+		}
+
+		// campaign_country
+		try {
+			const campaignCountry = await readJsonFile("campaign_countries.json");
+			await insertJunctionData(
+				client,
+				"campaign_country",
+				campaignCountry,
+				["campaign_id", "country_id"],
+				["campaign_id", "country_id"],
+			);
+			results.tables.campaign_country = { loaded: true };
+		} catch (error) {
+			console.error("Failed to load campaign_country:", error);
+			results.tables.campaign_country = {
+				loaded: false,
+				error: error.message,
+			};
+			results.errors.push({
+				table: "campaign_country",
+				error: error.message,
+			});
+		}
+
+		// campaign_industry
+		try {
+			const campaignIndustry = await readJsonFile("campaign_industries.json");
+			await insertJunctionData(
+				client,
+				"campaign_industry",
+				campaignIndustry,
+				["campaign_id", "industry_id"],
+				["campaign_id", "industry_id"],
+			);
+			results.tables.campaign_industry = { loaded: true };
+		} catch (error) {
+			console.error("Failed to load campaign_industry:", error);
+			results.tables.campaign_industry = {
+				loaded: false,
+				error: error.message,
+			};
+			results.errors.push({
+				table: "campaign_industry",
 				error: error.message,
 			});
 		}

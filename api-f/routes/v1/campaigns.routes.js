@@ -16,5 +16,7 @@ router.get(
 	"/:id/vulnerabilities",
 	campaignController.getCampaignWithVulnerabilities,
 );
+router.get("/:id/countries", campaignController.getCampaignWithCountries);
+router.get("/:id/industries", campaignController.getCampaignWithIndustries);
 
 export default router;

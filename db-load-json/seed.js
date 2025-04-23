@@ -10,6 +10,8 @@ import { getThreatGroups } from "./services/threatGroupService.js";
 import { getIntegrations } from "./services/integrationService.js";
 import { parseFile } from "./services/fileParserService.js";
 import { getDetections } from "./services/detectionService.js";
+import { getIndustries } from "./services/industryService.js";
+import { getCountries } from "./services/countryService.js";
 
 // Importar servicios de relaciones
 import { getCampaignTechniquesRelation } from "./services/relations/campaignTechniqueService.js";
@@ -19,8 +21,10 @@ import { getCampaignVulnerabilitiesRelation } from "./services/relations/campaig
 import { getTechniqueTacticsRelation } from "./services/relations/techniqueTacticService.js";
 import { getSoftwareTechniquesRelation } from "./services/relations/softwareTechniqueService.js";
 import { getThreatGroupTechniquesRelation } from "./services/relations/threatGroupTechniqueService.js";
+import { getCampaignIndustriesRelation } from "./services/relations/campaignIndustryService.js";
+import { getCampaignCountriesRelation } from "./services/relations/campaignCountryService.js";
 
-const STORAGE_DIR = "./db/common";
+const STORAGE_DIR = "../db-json/common";
 
 const seedData = async () => {
 	try {
@@ -34,6 +38,28 @@ const seedData = async () => {
 		const { techniques, fullTechniques } = await getTechniques();
 		await saveData("techniques", techniques, STORAGE_DIR);
 		console.log(`Saved ${techniques.length} techniques`);
+
+		// Get industries
+		try {
+			console.log("Fetching industries...");
+			const industries = await getIndustries();
+			await saveData("industries", industries, STORAGE_DIR);
+			console.log(`Saved ${industries.length} industries`);
+		} catch (error) {
+			console.error("Error fetching industries:", error.message);
+			console.log("Continuing with other data...");
+		}
+
+		// Get countries
+		try {
+			console.log("Fetching countries...");
+			const countries = await getCountries();
+			await saveData("countries", countries, STORAGE_DIR);
+			console.log(`Saved ${countries.length} countries`);
+		} catch (error) {
+			console.error("Error fetching countries:", error.message);
+			console.log("Continuing with other data...");
+		}
 
 		// Generate technique relationships
 		const techniqueTacticsRelations = [];
@@ -190,6 +216,8 @@ const seedData = async () => {
 		const campaignSoftwareRelations = [];
 		const campaignThreatGroupsRelations = [];
 		const campaignVulnerabilitiesRelations = [];
+		const campaignIndustriesRelations = [];
+		const campaignCountriesRelations = [];
 
 		for (const campaign of fullCampaigns) {
 			const campaignId = campaign.id;
@@ -233,6 +261,26 @@ const seedData = async () => {
 					});
 				});
 			}
+
+			// Relación campaña-industrias
+			if (campaign.industries && campaign.industries.length > 0) {
+				campaign.industries.forEach((industryId) => {
+					campaignIndustriesRelations.push({
+						campaign_id: campaignId,
+						industry_id: industryId,
+					});
+				});
+			}
+
+			// Relación campaña-países
+			if (campaign.countries && campaign.countries.length > 0) {
+				campaign.countries.forEach((countryId) => {
+					campaignCountriesRelations.push({
+						campaign_id: campaignId,
+						country_id: countryId,
+					});
+				});
+			}
 		}
 
 		// Guardar relaciones de campañas
@@ -251,6 +299,16 @@ const seedData = async () => {
 		await saveData(
 			"campaign_vulnerabilities",
 			campaignVulnerabilitiesRelations,
+			STORAGE_DIR,
+		);
+		await saveData(
+			"campaign_industries",
+			campaignIndustriesRelations,
+			STORAGE_DIR,
+		);
+		await saveData(
+			"campaign_countries",
+			campaignCountriesRelations,
 			STORAGE_DIR,
 		);
 

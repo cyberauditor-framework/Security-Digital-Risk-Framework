@@ -14,6 +14,64 @@ export async function findAll() {
 }
 
 /**
+ * Buscar campañas por filtros de países y/o industrias
+ */
+export async function findByFilters(countries = [], industries = []) {
+	const client = await getClient();
+	try {
+		let queryStr = "SELECT DISTINCT c.* FROM campaigns c";
+		const params = [];
+		let paramCounter = 1;
+		let hasConditions = false;
+
+		// Si hay filtros de países
+		if (countries && countries.length > 0) {
+			queryStr +=
+				" JOIN campaign_country cc ON c.id = cc.campaign_id WHERE cc.country_id IN (";
+			countries.forEach((_, index) => {
+				queryStr += index === 0 ? `$${paramCounter++}` : `, $${paramCounter++}`;
+				params.push(countries[index]);
+			});
+			queryStr += ")";
+			hasConditions = true;
+		}
+
+		// Si hay filtros de industrias
+		if (industries && industries.length > 0) {
+			if (hasConditions) {
+				// Ya teníamos condición WHERE, hay que usar AND
+				queryStr +=
+					" AND c.id IN (SELECT campaign_id FROM campaign_industry ci WHERE ci.industry_id IN (";
+			} else {
+				// No había condición WHERE, añadirla
+				queryStr +=
+					" JOIN campaign_industry ci ON c.id = ci.campaign_id WHERE ci.industry_id IN (";
+				hasConditions = true;
+			}
+
+			industries.forEach((_, index) => {
+				queryStr += index === 0 ? `$${paramCounter++}` : `, $${paramCounter++}`;
+				params.push(industries[index]);
+			});
+
+			queryStr += countries && countries.length > 0 ? "))" : ")";
+		}
+
+		queryStr += " ORDER BY c.id";
+
+		const result = await client.query(queryStr, params);
+		return result.rows;
+	} catch (error) {
+		console.error("Error al buscar campañas por filtros:", error);
+		throw new Error(
+			"Error al obtener las campañas filtradas de la base de datos",
+		);
+	} finally {
+		client.release();
+	}
+}
+
+/**
  * Buscar una campaña por ID
  */
 export async function findById(id) {
@@ -193,6 +251,87 @@ export async function findWithVulnerabilities(id) {
 		throw new Error(
 			`Error al obtener la campaña con vulnerabilidades para ID ${id}`,
 		);
+	} finally {
+		client.release();
+	}
+}
+
+/**
+ * Buscar una campaña con sus países asociados
+ */
+export async function findWithCountries(id) {
+	const client = await getClient();
+	try {
+		// Verificar si la campaña existe
+		const campaignResult = await client.query(
+			"SELECT * FROM campaigns WHERE id = $1",
+			[id],
+		);
+
+		if (campaignResult.rows.length === 0) {
+			return null;
+		}
+
+		const campaign = campaignResult.rows[0];
+
+		// Obtener países asociados
+		const countriesResult = await client.query(
+			`SELECT c.* 
+       FROM countries c
+       JOIN campaign_country cc ON c.value = cc.country_id
+       WHERE cc.campaign_id = $1`,
+			[id],
+		);
+
+		return {
+			...campaign,
+			countries: countriesResult.rows,
+		};
+	} catch (error) {
+		console.error(`Error al obtener campaña con países para ID ${id}:`, error);
+		throw new Error(`Error al obtener la campaña con países para ID ${id}`);
+	} finally {
+		client.release();
+	}
+}
+
+/**
+ * Buscar una campaña con sus industrias asociadas
+ */
+export async function findWithIndustries(id) {
+	const client = await getClient();
+	try {
+		// Verificar si la campaña existe
+		const campaignResult = await client.query(
+			"SELECT * FROM campaigns WHERE id = $1",
+			[id],
+		);
+
+		if (campaignResult.rows.length === 0) {
+			return null;
+		}
+
+		const campaign = campaignResult.rows[0];
+
+		// Obtener industrias asociadas
+		const industriesResult = await client.query(
+			`SELECT i.* 
+       FROM industries i
+       JOIN campaign_industry ci ON i.value = ci.industry_id
+       WHERE ci.campaign_id = $1`,
+			[id],
+		);
+
+		return {
+			...campaign,
+			industries: industriesResult.rows,
+		};
+	} catch (error) {
+		console.error(
+			`Error al obtener campaña con industrias para ID ${id}:`,
+			error,
+		);
+		throw new Error(`Error al obtener la campaña con industrias para ID ${id}`);
 	} finally {
 		client.release();
 	}
