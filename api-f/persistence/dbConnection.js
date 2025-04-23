@@ -8,9 +8,7 @@ const { Pool } = pg;
 // PostgreSQL connection pool setup
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
-	ssl: {
-		rejectUnauthorized: false,
-	},
+	ssl: false,
 });
 
 // Test the connection
