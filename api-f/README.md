@@ -1,3 +1,5 @@
+
+
     -- Tabla de integraciones
 
 CREATE  TABLE  integrations (
