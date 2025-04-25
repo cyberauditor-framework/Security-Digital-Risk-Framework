@@ -15,79 +15,96 @@ const HEADERS = {
 };
 
 export const getCampaigns = async () => {
-	const getCampaignsQueryVariable = {
-		offset: 0,
-		name_Icontains: "",
-		origins: "",
-		content: "",
-		showOnlyWithExploits: false,
-		limitCampaigns: false,
-		techniqueMitreIds: "",
-		softwareMitreIds: "",
-		threatGroupsMitreIds: "",
-		industries: [],
-		countries: [],
-		pageSize: 100,
-		orderBy: "-createdTimestamp",
-	};
+	try {
+		const getCampaignsQueryVariable = {
+			offset: 0,
+			name_Icontains: "",
+			origins: "",
+			content: "",
+			showOnlyWithExploits: false,
+			limitCampaigns: false,
+			techniqueMitreIds: "",
+			softwareMitreIds: "",
+			threatGroupsMitreIds: "",
+			industries: [],
+			countries: [],
+			pageSize: 100,
+			orderBy: "-createdTimestamp",
+		};
 
-	console.log("Fetching campaigns with pagination...");
-	const rawCampaigns = await graphqlFetch(
-		ENDPOINT,
-		getCampaignsQuery,
-		getCampaignsQueryVariable,
-		HEADERS,
-	);
+		console.log("Fetching campaigns with pagination...");
+		const rawCampaigns = await graphqlFetch(
+			ENDPOINT,
+			getCampaignsQuery,
+			getCampaignsQueryVariable,
+			HEADERS,
+		);
 
-	const formattedCampaigns = cleanGraphQLResponse(rawCampaigns);
+		const formattedCampaigns = cleanGraphQLResponse(rawCampaigns);
 
-	if (
-		!formattedCampaigns ||
-		!formattedCampaigns.prioritizedCampaigns ||
-		formattedCampaigns.prioritizedCampaigns.length === 0
-	) {
-		console.log("Campaigns not found.");
-		return { campaigns: [], fullCampaigns: [] };
+		if (
+			!formattedCampaigns ||
+			!formattedCampaigns.prioritizedCampaigns ||
+			formattedCampaigns.prioritizedCampaigns.length === 0
+		) {
+			console.log("Campaigns not found.");
+			return { campaigns: [], fullCampaigns: [] };
+		}
+
+		// Log the total campaigns vs fetched campaigns
+		console.log(
+			`Successfully fetched ${formattedCampaigns.prioritizedCampaigns.length} campaigns out of ${rawCampaigns.prioritizedCampaigns.totalCount} total campaigns`,
+		);
+
+		// Crear una versión simplificada para el JSON
+		const simplifiedCampaigns = formattedCampaigns.prioritizedCampaigns.map(
+			(campaign) => ({
+				id: campaign.campaign?.id || campaign.id,
+				interpressId: campaign.id,
+				name: campaign.name,
+				stixId: campaign.stixId,
+				description: campaign.description,
+				deprecated: campaign.deprecated,
+				revoked: campaign.revoked,
+				createdTimestamp: campaign.createdTimestamp,
+				modifiedTimestamp: campaign.modifiedTimestamp,
+				origin: campaign.origin || "",
+				priority: campaign.priority || 0,
+				firstSeenTimestamp: campaign.firstSeenTimestamp,
+				lastSeenTimestamp: campaign.lastSeenTimestamp,
+				aliasNames: campaign.aliasNames || [],
+				vulnerabilityCveIds: campaign.vulnerabilityCveIds || [],
+				referenceUrls: campaign.referenceUrls || [],
+				industries: campaign.industries || [],
+				countries: campaign.countries || [],
+			}),
+		);
+
+		// Construir los fullCampaigns conservando las propiedades relevantes del nivel superior
+		const fullCampaignsWithIndustriesAndCountries =
+			formattedCampaigns.prioritizedCampaigns
+				.map((campaign) => {
+					// Solo considerar campañas que tienen el objeto campaign interno
+					if (!campaign.campaign) return null;
+
+					// Combinar el objeto campaign interno con las propiedades de nivel superior
+					return {
+						...campaign.campaign,
+						interpressId: campaign.id,
+						industries: campaign.industries || [],
+						countries: campaign.countries || [],
+					};
+				})
+				.filter(Boolean);
+
+		return {
+			campaigns: simplifiedCampaigns,
+			fullCampaigns: fullCampaignsWithIndustriesAndCountries,
+		};
+	} catch (error) {
+		console.error("Error fetching campaigns:", error);
+		throw error;
 	}
-
-	// Log the total campaigns vs fetched campaigns
-	console.log(
-		`Successfully fetched ${formattedCampaigns.prioritizedCampaigns.length} campaigns out of ${rawCampaigns.prioritizedCampaigns.totalCount} total campaigns`,
-	);
-
-	// Crear una versión simplificada para el JSON
-	const simplifiedCampaigns = formattedCampaigns.prioritizedCampaigns.map(
-		(campaign) => ({
-			id: campaign.campaign?.id || campaign.id,
-			interpressId: campaign.id,
-			name: campaign.name,
-			stixId: campaign.stixId,
-			description: campaign.description,
-			deprecated: campaign.deprecated,
-			revoked: campaign.revoked,
-			createdTimestamp: campaign.createdTimestamp,
-			modifiedTimestamp: campaign.modifiedTimestamp,
-			update: campaign.update,
-			type: campaign.type,
-			origin: campaign.origin,
-			firstSeenTimestamp: campaign.firstSeenTimestamp,
-			lastSeenTimestamp: campaign.lastSeenTimestamp,
-			aliasNames: campaign.aliasNames,
-			techniquesCount: campaign.techniquesCount,
-			softwareCount: campaign.softwareCount,
-			threatGroupsCount: campaign.threatGroupsCount,
-			vulnerabilityCveIds: campaign.vulnerabilityCveIds,
-			vulnerabilitiesCount: campaign.vulnerabilitiesCount,
-			assetsCount: campaign.assetsCount,
-		}),
-	);
-
-	return {
-		campaigns: simplifiedCampaigns,
-		fullCampaigns: formattedCampaigns.prioritizedCampaigns
-			.map((campaign) => campaign.campaign)
-			.filter(Boolean),
-	};
 };
 
 export const getCampaignsWithThreatProfile = async () => {
@@ -156,13 +173,27 @@ export const getCampaignsWithThreatProfile = async () => {
 		}),
 	);
 
-	const result = {
+	// Construir los fullCampaigns conservando las propiedades relevantes del nivel superior
+	const fullCampaignsWithIndustriesAndCountries =
+		formattedCampaigns.prioritizedCampaigns
+			.map((campaign) => {
+				// Solo considerar campañas que tienen el objeto campaign interno
+				if (!campaign.campaign) return null;
+
+				// Combinar el objeto campaign interno con las propiedades de nivel superior
+				return {
+					...campaign.campaign,
+					interpressId: campaign.id,
+					industries: campaign.industries || [],
+					countries: campaign.countries || [],
+				};
+			})
+			.filter(Boolean);
+
+	return {
 		campaigns: simplifiedCampaigns,
-		fullCampaigns: formattedCampaigns.prioritizedCampaigns
-			.map((campaign) => campaign.campaign)
-			.filter(Boolean),
+		fullCampaigns: fullCampaignsWithIndustriesAndCountries,
 	};
-	return result;
 };
 
 export const getCampaignDetail = async (campaignId) => {
